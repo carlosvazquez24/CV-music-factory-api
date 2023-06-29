@@ -27,7 +27,7 @@ http://www.mulesoft.org/schema/mule/sps-logger http://www.mulesoft.org/schema/mu
 	</secure-properties:config>
 
     <!-- This is the configuration to let this mule app talk to API Manager's corresponding API -->
-    <api-gateway:autodiscovery apiId="${api.apiId}" doc:name="API Autodiscovery" doc:id="64e53ea9-8f3d-4165-8451-fc9e075835f3" flowRef="xCV-music-factory-api-main" />
+    <api-gateway:autodiscovery apiId="${api.apiId}" doc:name="API Autodiscovery" doc:id="64e53ea9-8f3d-4165-8451-fc9e075835f3" flowRef="cv-music-factory-api-main" ignoreBasePath="true"/>
 
     <!-- Added to expedite the Bootcamp project archetype -->
 	<global-property doc:name="Global Property" doc:id="0a76d4c0-842d-40b6-9fc5-2f5cf73b0360" name="secureKey" value="password" />
@@ -37,7 +37,7 @@ http://www.mulesoft.org/schema/mule/sps-logger http://www.mulesoft.org/schema/mu
 
     <!-- Listener references "env" specific properties -->
 	<http:listener-config name="http-listener-config" doc:name="HTTP Listener config" doc:id="110e7948-6f84-4387-937e-2728db55929e" >
-		<http:listener-connection host="${http.host}" port="${http.port}" />
+		<http:listener-connection host="0.0.0.0" port="8082" />
 	</http:listener-config>
 	<sps-logger:config name="SPS_Logger_Config" doc:name="SPS-Logger Config" doc:id="ea75707d-c112-4125-9d7a-481b176a46c1" appName="${api.name}" appVersion="${api.version}" />
 	<error-handler name="globalErrorHandler">
