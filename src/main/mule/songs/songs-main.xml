@@ -23,7 +23,9 @@ output application/json
         </ee:transform>
     </flow>
 	<flow name="get:\songs:cv-music-factory-api-config">
-        <ee:transform>
+        <set-variable value="songs-main::impl-get-songs" doc:name="currentFlow" doc:id="112556e2-5fb3-499c-8e00-fb8903851b82" variableName="currentFlow"/>
+		<flow-ref doc:name="Flow Reference" doc:id="631c186c-75f7-405d-a939-cad60846f49f" name="impl-get-songs"/>
+		<ee:transform>
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
 output application/json
