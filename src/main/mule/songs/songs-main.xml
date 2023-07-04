@@ -22,52 +22,7 @@ output application/json
             </ee:message>
         </ee:transform>
     </flow>
-	<flow name="get:\songs:cv-music-factory-api-config">
-        <set-variable value="songs-main::impl-get-songs" doc:name="currentFlow" doc:id="112556e2-5fb3-499c-8e00-fb8903851b82" variableName="currentFlow"/>
-		<flow-ref doc:name="Flow Reference" doc:id="631c186c-75f7-405d-a939-cad60846f49f" name="impl-get-songs"/>
-		<ee:transform>
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  statusCode: 200,
-  message: "SUCCESSFUL",
-  searchCriteria: "Kill",
-  songs: [
-    {
-      songId: 13,
-      songTitle: "I May Kill Myself",
-      genre: "Other",
-      publicationDate: "1942-01-02",
-      duration: "13:52",
-      albumId: 8,
-      albumName: "Harry Belts a Tune",
-      songWriters: [
-        {
-          writer: "Harry Carry"
-        }
-      ]
-    }, 
-    {
-      songId: 13,
-      songTitle: "Don't Kill Yourself",
-      genre: "Rock",
-      publicationDate: "1951-01-02",
-      duration: "13:52",
-      albumId: 8,
-      albumName: "Saving A Life Today",
-      songWriters: [
-        {
-          writer: "Will Meaning"
-        }
-      ]
-    }
-  ]
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
-    </flow>
+
 	<flow name="delete:\songs\(songId):cv-music-factory-api-config">
         <ee:transform>
             <ee:variables>
@@ -145,6 +100,54 @@ output application/json
       genre: "Other",
       albumId: 7,
       artistId: 102
+    }
+  ]
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    
+    
+    <flow name="get:\songs:cv-music-factory-api-config">
+        <set-variable value="songs-main::impl-get-songs" doc:name="currentFlow" doc:id="112556e2-5fb3-499c-8e00-fb8903851b82" variableName="currentFlow"/>
+		<flow-ref doc:name="Flow Reference" doc:id="631c186c-75f7-405d-a939-cad60846f49f" name="impl-get-songs"/>
+		<ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  statusCode: 200,
+  message: "SUCCESSFUL",
+  searchCriteria: "Kill",
+  songs: [
+    {
+      songId: 13,
+      songTitle: "I May Kill Myself",
+      genre: "Other",
+      publicationDate: "1942-01-02",
+      duration: "13:52",
+      albumId: 8,
+      albumName: "Harry Belts a Tune",
+      songWriters: [
+        {
+          writer: "Harry Carry"
+        }
+      ]
+    }, 
+    {
+      songId: 13,
+      songTitle: "Don't Kill Yourself",
+      genre: "Rock",
+      publicationDate: "1951-01-02",
+      duration: "13:52",
+      albumId: 8,
+      albumName: "Saving A Life Today",
+      songWriters: [
+        {
+          writer: "Will Meaning"
+        }
+      ]
     }
   ]
 }]]></ee:set-payload>

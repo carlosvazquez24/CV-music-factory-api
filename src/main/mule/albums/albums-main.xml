@@ -50,36 +50,6 @@ output application/json
 	<flow name="get:\albums:cv-music-factory-api-config">
         <set-variable value="albums-main::impl-get-albums" doc:name="currentFlow" doc:id="8b1dbf34-c997-4241-a6ba-e9456c20f7f0" variableName="currentFlow"/>
 		<flow-ref doc:name="Flow Reference" doc:id="f2f7d28c-ce4e-408f-ba3b-b8c32edee837" name="impl-get-albums"/>
-		<ee:transform>
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  statusCode: 200,
-  message: "SUCCESS",
-  searchCriteria: "Let it Be",
-  albums: [
-    {
-      albumId: 1,
-      albumTitle: "The Beatles",
-      genre: "Rock",
-      publicationDate: "1968-11-22",
-      artistId: 1,
-      groupName: "The Beatles"
-    }, 
-    {
-      albumId: 4,
-      albumTitle: "Let It Be",
-      genre: "Rock",
-      publicationDate: "2000-05-08",
-      artistId: 1,
-      groupName: "The Beatles"
-    }
-  ]
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
     </flow>
 	<flow name="post:\albums:application\json:cv-music-factory-api-config">
         <set-variable value="albums-main::impl-add-albums" doc:name="currentFlow" doc:id="08ea3219-93d6-4c4f-8ebb-5f0ca6a9990d" variableName="currentFlow"/>
