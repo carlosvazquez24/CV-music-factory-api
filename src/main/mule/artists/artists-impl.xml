@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="impl-get-artists" doc:id="19434f60-fa56-45b1-bb52-30415497eebb" >
+		<logger level="INFO" doc:name="INFO START" doc:id="36ba1e13-4f3c-4a0b-bfcc-cd9e273b145f" message="impl-get-artists::START"/>
+		<set-variable value="#[message.attributes.queryParams.groupName]" doc:name="groupName" doc:id="b15d9da6-7506-4867-8ba3-327e2974ae38" variableName="groupName"/>
+		<db:select doc:name="Select" doc:id="d6e0a86f-80ef-453c-af89-c0d6c8dc7281" config-ref="mysql-connection">
+			<db:sql ><![CDATA[SELECT ARTIST_ID, GROUP_NM, FIRST_NM, LAST_NM, BIRTH_DATE, MI, DEATH_DATE 	
+    FROM BC_ARTIST 
+	  WHERE GROUP_NM LIKE :groupName]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	groupName: vars.groupName ++ '%'
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="39b4409c-f5ab-42fb-815b-411cca058ca5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	statusCode: p('http.get.status.ok'),
+	message: p('http.get.message.ok'),
+	searchCriteria: vars.groupName,
+	artists: payload map (artist) -> {
+		artistId: artist.ARTIST_ID,
+		groupName: artist.GROUP_NM default "",
+		lastName: artist.LAST_NM default "",
+		firstName: artist.FIRST_NM default "",
+		dateOfBirth: artist.BIRTH_DATE as String{
+			format: "yyyy-MM-dd"
+		} default "",
+		mi: artist.MI default "",
+		dateOfDeath: artist.DEATH_DATE as String{
+			format: "yyyy-MM-dd"
+		} default ""
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="impl-add-artists" doc:id="7642bb7e-1974-4120-b3bf-af392804ca14" >
+		<logger level="INFO" doc:name="INFO START" doc:id="86c5bc17-05bc-4f35-bcd3-e96ab0b878fe" message="#['impl-add-artists::START::payload:'  ++ write(payload, 'application/json')]"/>
+	</sub-flow>
+	<sub-flow name="impl-update-artist-urls" doc:id="f2a1f707-209f-4c2f-a600-270ffe521c38" >
+		<logger level="INFO" doc:name="INFO START" doc:id="e79b5ff0-69ff-4f1a-aba0-5a80db8084fd" message="#['impl-update-artist-urls::START::payload:'  ++ write(payload, 'application/json')]"/>
+	</sub-flow>
+</mule>

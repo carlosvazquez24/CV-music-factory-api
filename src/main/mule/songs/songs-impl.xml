@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <sub-flow name="impl-get-songs" doc:id="984c8f73-b94f-4b26-9ac5-2e2842765939" >
+		<logger level="INFO" doc:name="INFO START" doc:id="917ea14e-d089-49d1-af0d-f5f469075ece" message="impl-get-songs::START"/>
+		<set-variable value="#[message.attributes.queryParams.songTitle]" doc:name="songTitle" doc:id="9812ad0a-f95a-49e2-8468-afbc59c80cd6" variableName="songTitle"/>
+		<db:select doc:name="Select songs" doc:id="edcf773c-fb1d-4aac-bde6-953f3558b9aa" config-ref="mysql-connection">
+			<db:sql ><![CDATA[SELECT SNG.SONG_ID, SNG.SONG_TITLE, SNG.PUBLICATION_DT, SNG.GENRE, 
+SNG.DURATION,ALB.TITLE AS ALBUM_NM, ART.GROUP_NM, ALB.ALBUM_ID
+    FROM BC_SONG SNG
+        LEFT OUTER JOIN BC_ALBUM ALB 
+          ON SNG.ALBUM_ID = ALB.ALBUM_ID
+        LEFT OUTER JOIN BC_ARTIST ART 
+          ON ALB.ARTIST_ID = ART.ARTIST_ID
+WHERE SONG_TITLE LIKE :songTitle ]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{songTitle: vars.songTitle ++ '%'}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="0a711749-13f1-4d62-8aca-ee73cbf844ce" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	statusCode: p('http.get.status.ok'),
+	message: p('http.get.message.ok'),
+	searchCriteria: vars.songTitle,
+	songs: payload map ( song ) -> {
+		songId: song.SONG_ID,
+		songTitle: song.SONG_TITLE,
+		genre: song.GENRE default "",
+		publicationDate: song.PUBLICATION_DT as String{format: "yyyy-MM-dd"} default "",
+		duration: song.DURATION default "",
+		albumId: (song.ALBUM_ID default 0),
+		albumName: song.ALBUM_NM default "",
+		songWriters: [{
+			writer: song.GROUP_NM default ""
+		}]
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	
+</sub-flow>
+</mule>

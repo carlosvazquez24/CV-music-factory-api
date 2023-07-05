@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<sub-flow name="impl-get-catalog" doc:id="e09fcf6c-5872-4259-970f-4dcbdfde7006" >
+		<logger level="INFO" doc:name="INFO START" doc:id="7d985af4-b3d6-4a1d-abd3-2663e6995072" message="impl-get-catalog::START"/>
+	</sub-flow>
+</mule>
