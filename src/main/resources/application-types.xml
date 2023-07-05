@@ -26,6 +26,18 @@ type songs = {|
 
 ]]></types:shape>
     </types:type>
+    <types:type name="artists" format="json">
+      <types:shape format="weave" example="api/examples/artist/responses/artistsGetResponse.json"><![CDATA[%dw 2.0
+
+type artists = {|
+  statusCode: Number {"typeId": "int"}, 
+  message: String, 
+  searchCriteria: String, 
+  artists: Array<{|    artistId: Number {"typeId": "int"},     groupName: String,     lastName: String,     firstName: String,     dateOfBirth: String,     mi: String,     dateOfDeath: String  |}>
+|} {"example": "{\\\"statusCode\\\":200,\\\"message\\\":\\\"SUCCESS\\\",\\\"searchCriteria\\\":\\\"[groupName: 'Telegraph Canyon', ]\\\",\\\"artists\\\":[{\\\"artistId\\\":48,\\\"groupName\\\":\\\"Telegraph Canyon\\\",\\\"lastName\\\":\\\"Hickman\\\",\\\"firstName\\\":\\\"Johnny\\\",\\\"dateOfBirth\\\":\\\"1988-01-29\\\"},{\\\"artistId\\\":49,\\\"groupName\\\":\\\"Telegraph Canyon\\\",\\\"lastName\\\":\\\"Harrison\\\",\\\"firstName\\\":\\\"Teddy\\\",\\\"mi\\\":\\\"B\\\",\\\"dateOfBirth\\\":\\\"1982-03-21\\\",\\\"dateOfDeath\\\":\\\"2015-03-22\\\"},{\\\"artistId\\\":50,\\\"groupName\\\":\\\"Telegraph Canyon\\\",\\\"lastName\\\":\\\"Hickman\\\",\\\"firstName\\\":\\\"Jack\\\",\\\"dateOfBirth\\\":\\\"1988-01-29\\\"}]}"}
+
+]]></types:shape>
+    </types:type>
   </types:catalog>
   <types:enrichment select="#a94a9d8e-53f4-4077-8d25-cd2b7626188f">
     <types:processor-declaration>
@@ -41,6 +53,15 @@ type songs = {|
       <types:output-event>
         <types:message>
           <types:payload type="songs"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#39b4409c-f5ab-42fb-815b-411cca058ca5">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="artists"/>
         </types:message>
       </types:output-event>
     </types:processor-declaration>

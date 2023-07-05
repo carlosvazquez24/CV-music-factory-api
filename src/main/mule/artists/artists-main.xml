@@ -65,43 +65,6 @@ output application/json
 	<flow name="get:\artists:cv-music-factory-api-config">
         <set-variable value="artists-main::impl-get-artists" doc:name="Current flow" doc:id="d0f07d64-e016-446e-add7-240183a50fc6" variableName="currentFlow"/>
 		<flow-ref doc:name="Flow Reference" doc:id="1eda7215-8076-441d-9c05-d907cb016d8a" name="impl-get-artists"/>
-		<ee:transform>
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  statusCode: 200,
-  message: "SUCCESS",
-  searchCriteria: "[groupName: 'Telegraph Canyon', ]",
-  artists: [
-    {
-      artistId: 48,
-      groupName: "Telegraph Canyon",
-      lastName: "Hickman",
-      firstName: "Johnny",
-      dateOfBirth: "1988-01-29"
-    }, 
-    {
-      artistId: 49,
-      groupName: "Telegraph Canyon",
-      lastName: "Harrison",
-      firstName: "Teddy",
-      mi: "B",
-      dateOfBirth: "1982-03-21",
-      dateOfDeath: "2015-03-22"
-    }, 
-    {
-      artistId: 50,
-      groupName: "Telegraph Canyon",
-      lastName: "Hickman",
-      firstName: "Jack",
-      dateOfBirth: "1988-01-29"
-    }
-  ]
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
     </flow>
 	<flow name="get:\artists\(artistId)\songs:cv-music-factory-api-config">
         <ee:transform>

@@ -28,16 +28,16 @@ output application/json
 	statusCode: p('http.get.status.ok'),
 	message: p('http.get.message.ok'),
 	searchCriteria: vars.songTitle,
-	songs: payload map ( songs ) -> {
-		songId: songs.SONG_ID,
-		songTitle: songs.SONG_TITLE,
-		genre: songs.GENRE default "",
-		publicationDate: songs.PUBLICATION_DT as String{format: "yyyy-MM-dd"} default "",
-		duration: songs.DURATION default "",
-		albumId: (songs.ALBUM_ID default 0),
-		albumName: songs.ALBUM_NM default "",
+	songs: payload map ( song ) -> {
+		songId: song.SONG_ID,
+		songTitle: song.SONG_TITLE,
+		genre: song.GENRE default "",
+		publicationDate: song.PUBLICATION_DT as String{format: "yyyy-MM-dd"} default "",
+		duration: song.DURATION default "",
+		albumId: (song.ALBUM_ID default 0),
+		albumName: song.ALBUM_NM default "",
 		songWriters: [{
-			writer: songs.GROUP_NM default ""
+			writer: song.GROUP_NM default ""
 		}]
 	}
 }]]></ee:set-payload>
