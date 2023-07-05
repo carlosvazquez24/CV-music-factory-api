@@ -43,7 +43,81 @@ output application/json
 		</ee:transform>
 	</sub-flow>
 	<sub-flow name="impl-add-artists" doc:id="7642bb7e-1974-4120-b3bf-af392804ca14" >
-		<logger level="INFO" doc:name="INFO START" doc:id="86c5bc17-05bc-4f35-bcd3-e96ab0b878fe" message="#['impl-add-artists::START::payload:'  ++ write(payload, 'application/json')]"/>
+		<logger level="INFO" doc:name="INFO size of" doc:id="86c5bc17-05bc-4f35-bcd3-e96ab0b878fe" message="#['impl-add-artists::START::sizeOf payload: '  ++ sizeOf(payload.artists)]"/>
+		<ee:transform doc:name="artists, artistsOut, artistsFound" doc:id="cac21919-26ef-4ae2-8ffa-415d6a64dfcd" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="artistsOut" ><![CDATA[%dw 2.0
+output application/json
+---
+[]]]></ee:set-variable>
+				<ee:set-variable variableName="artistsFound" ><![CDATA[%dw 2.0
+output application/json
+---
+[]]]></ee:set-variable>
+				<ee:set-variable variableName="artists" ><![CDATA[%dw 2.0
+output application/json
+---
+message.payload.artists]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<foreach doc:name="For Each Artist" doc:id="10ad0802-c48b-47ca-80fa-98ef545fc25c" collection="#[vars.artists]">
+			<logger level="INFO" doc:name="Payload artist" doc:id="744da7a9-2007-4b28-8d0a-ef585a37ee09" message="#['impl-add-artists::ForEach::payload: ' ++ write(payload,'application/json')]"/>
+			<set-payload doc:name="Artist" doc:id="e9ead0cb-b566-4ffa-9f7d-bdcb7b05385c" value="#[output application/json&#10;---&#10;{&#10;	artist:{&#10;		artistId: payload.aristId,&#10;		groupName: payload.groupName,&#10;		lastName: payload.lastName,&#10;		firstName: payload.firstName,&#10;		mi: payload.mi,&#10;		dateOfBirth: payload.dateOfBirth,&#10;		dateOfDeath: payload.dateOfDeath	&#10;	}&#10;}]"/>
+			<logger level="INFO" doc:name="artist" doc:id="59aa581e-3a3a-4f29-b305-3cce79a9b6f5" message="#['impl-add-artists::ForEach::artist: ' ++ write(payload, 'application/json')]"/>
+			<flow-ref doc:name="sr-insert-Flow" doc:id="8aa54272-d9ee-4405-a0f9-9123eebc0094" name="sr-insert-Flow" target="newArtist"/>
+			<set-variable value="#[%dw 2.0&#10;output application/java&#10;---&#10;vars.artistsOut + vars.newArtist]" doc:name="append artistsOut" doc:id="2701fb1d-ff66-4d2d-9273-4288c6dd15d4" variableName="artistsOut"/>
+		</foreach>
+		<ee:transform doc:name="Transform Message" doc:id="b8f60c5c-7f06-47fb-afb9-176ea2ce96f7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "statusCode": p('http.add.status.ok'),
+    "message":    p('http.add.message.ok'),
+    "artistsAdded": 
+   		  vars.artistsOut,
+	"duplicateArtists": 
+  		  vars.artistsFound
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="sr-insert-Flow" doc:id="ee572642-5a49-4b59-8095-05b81a1a1c50" >
+		<logger level="INFO" doc:name="INFO START payload" doc:id="67768664-53c1-45be-9aa1-3ebe0265a1fb" message="#['sr-insert-artist::START::artist: ' ++ write(payload,'application/json')]"/>
+		<set-variable value="#[message.payload.artist]" doc:name="incomingArtist" doc:id="b257eb52-d8e5-48c3-b369-c5fe95ae7545" variableName="incomingArtist"/>
+		<db:insert doc:name="Insert Artist" doc:id="1bb2b836-3d98-4631-bbb2-61215f3e2292" config-ref="mysql-connection">
+			<db:sql ><![CDATA[INSERT INTO BC_MUSIC_FACTORY.BC_ARTIST 
+         (ARTIST_ID, GROUP_NM, FIRST_NM, LAST_NM, MI, BIRTH_DATE, DEATH_DATE, STATUS_CD) 
+         VALUES (NULL, :groupName, :firstName, :lastName, :mi, :birthDate, :deathDate, 'CV')]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+    groupName: 	vars.incomingArtist.groupName,
+    firstName: 	vars.incomingArtist.firstName,
+    lastName: 	vars.incomingArtist.lastName,
+    mi: 	  	vars.incomingArtist.mi,
+    birthDate: 	vars.incomingArtist.dateOfBirth,
+    deathDate: 	vars.incomingArtist.dateOfDeath
+}]]]></db:input-parameters>
+		</db:insert>
+		<db:select doc:name="Select Insert" doc:id="508152be-2344-4bcd-8b12-701dd889c1f8" config-ref="mysql-connection" target="newArtistId">
+			<db:sql ><![CDATA[SELECT MAX(artist_id) AS artist_id from BC_MUSIC_FACTORY.BC_ARTIST
+    WHERE GROUP_NM = :groupName 
+          AND BIRTH_DATE = :birthDate 
+          AND FIRST_NM = :firstName
+          AND LAST_NM = :lastName
+]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+    groupName: 	vars.incomingArtist.groupName,
+    firstName: 	vars.incomingArtist.firstName,
+    lastName: 	vars.incomingArtist.lastName,
+    birthDate: 	vars.incomingArtist.dateOfBirth
+}]]]></db:input-parameters>
+		</db:select>
+		<set-payload value="#[output application/java&#10;var artist = vars.incomingArtist&#10;var newArtistId = vars.newArtistId[0].artist_id default 0&#10;---&#10;{&#10;	artistId: 	newArtistId,&#10;	groupName: 	artist.groupName,&#10;	lastName: 	artist.lastName,&#10;	firstName: 	artist.firstName,&#10;	mi:       	artist.mi,&#10;	dateOfBirth: 	artist.dateOfBirth,&#10;	dateOfDeath:	artist.dateOfDeath&#10;}]" doc:name="Update the payload inserted" doc:id="5473557e-6b51-4e16-a7a6-bb11851770e0" />
+		<logger level="INFO" doc:name="INFO END payload" doc:id="f23899e9-4d6f-49d8-9ddb-1b719006ef2d" message="#['sr-insert-artist::END:payload: ' ++ write(payload,'application/json')]"/>
 	</sub-flow>
 	<sub-flow name="impl-update-artist-urls" doc:id="f2a1f707-209f-4c2f-a600-270ffe521c38" >
 		<logger level="INFO" doc:name="INFO START" doc:id="e79b5ff0-69ff-4f1a-aba0-5a80db8084fd" message="#['impl-update-artist-urls::START::payload:'  ++ write(payload, 'application/json')]"/>
