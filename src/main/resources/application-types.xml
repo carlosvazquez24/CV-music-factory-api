@@ -13,12 +13,34 @@ type albums = {|
 
 ]]></types:shape>
     </types:type>
+    <types:type name="songs" format="json">
+      <types:shape format="weave" example="api/examples/song/responses/songsGetResponse.json"><![CDATA[%dw 2.0
+
+type songs = {|
+  statusCode: Number {"typeId": "int"}, 
+  message: String, 
+  searchCriteria: String, 
+  songs: Array<{|    songId: Number {"typeId": "int"},     songTitle: String,     genre: String,     publicationDate: String,     duration: String,     albumId: Number {"typeId": "int"},     albumName: String,     songWriters: Array<{| writer: String |}>
+  |}>
+|} {"example": "{\\\"statusCode\\\":200,\\\"message\\\":\\\"SUCCESSFUL\\\",\\\"searchCriteria\\\":\\\"Kill\\\",\\\"songs\\\":[{\\\"songId\\\":13,\\\"songTitle\\\":\\\"I May Kill Myself\\\",\\\"genre\\\":\\\"Other\\\",\\\"publicationDate\\\":\\\"1942-01-02\\\",\\\"duration\\\":\\\"13:52\\\",\\\"albumId\\\":8,\\\"albumName\\\":\\\"Harry Belts a Tune\\\",\\\"songWriters\\\":[{\\\"writer\\\":\\\"Harry Carry\\\"}]},{\\\"songId\\\":13,\\\"songTitle\\\":\\\"Don't Kill Yourself\\\",\\\"genre\\\":\\\"Rock\\\",\\\"publicationDate\\\":\\\"1951-01-02\\\",\\\"duration\\\":\\\"13:52\\\",\\\"albumId\\\":8,\\\"albumName\\\":\\\"Saving A Life Today\\\",\\\"songWriters\\\":[{\\\"writer\\\":\\\"Will Meaning\\\"}]}]}"}
+
+]]></types:shape>
+    </types:type>
   </types:catalog>
   <types:enrichment select="#a94a9d8e-53f4-4077-8d25-cd2b7626188f">
     <types:processor-declaration>
       <types:output-event>
         <types:message>
           <types:payload type="albums"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#0a711749-13f1-4d62-8aca-ee73cbf844ce">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="songs"/>
         </types:message>
       </types:output-event>
     </types:processor-declaration>
