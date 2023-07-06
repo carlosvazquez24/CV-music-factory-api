@@ -7,40 +7,65 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<sub-flow name="impl-get-artists" doc:id="19434f60-fa56-45b1-bb52-30415497eebb" >
 		<logger level="INFO" doc:name="INFO START" doc:id="36ba1e13-4f3c-4a0b-bfcc-cd9e273b145f" message="impl-get-artists::START"/>
-		<set-variable value="#[message.attributes.queryParams.groupName]" doc:name="groupName" doc:id="b15d9da6-7506-4867-8ba3-327e2974ae38" variableName="groupName"/>
-		<db:select doc:name="Select" doc:id="d6e0a86f-80ef-453c-af89-c0d6c8dc7281" config-ref="mysql-connection">
-			<db:sql ><![CDATA[SELECT ARTIST_ID, GROUP_NM, FIRST_NM, LAST_NM, BIRTH_DATE, MI, DEATH_DATE 	
+		<flow-ref doc:name="sr-build-query-param-list" doc:id="88cb9e1c-8ec5-40b7-b835-5105c26d4501" name="sr-build-query-param-list" target="queryParamList" targetValue="#[message.payload]"/>
+		<flow-ref doc:name="sr-select-artists" doc:id="fbe78cda-3e59-4dc3-a9a2-cdb6126bb9b9" name="sr-select-artists"/>
+	</sub-flow>
+	<sub-flow name="sr-select-artists" doc:id="d644ef0c-6f1b-4e52-8b26-b95a43896f20" >
+		<logger level="INFO" doc:name="INFO START" doc:id="ebf48f54-54c9-4f85-b3ac-931d99d6e41e" message="#['sr-select-artists::START::payload: ' ++ write(payload,'application/json')]"/>
+		<set-variable value="#[%dw 2.0&#10;   output application/java&#10;---&#10;(&quot;1=1&quot;&#10;	++ (if(vars.queryParamList.lastName != null) &quot; AND lower(LAST_NM) LIKE concat(lower(:lastName),'%')&quot; else &quot;&quot;)&#10;    ++ (if(vars.queryParamList.firstName != null) &quot; AND lower(FIRST_NM) LIKE concat(lower(:firstName),'%')&quot; else &quot;&quot;)&#10;    ++ (if(vars.queryParamList.groupName != null) &quot; AND lower(GROUP_NM) LIKE concat(lower(:groupName),'%')&quot; else &quot;&quot;)&#10;    ++ (if(vars.queryParamList.dateOfBirth != null) &quot; AND BIRTH_DATE = :dateOfBirth&quot; else &quot;&quot;)&#10;) as String]" doc:name="whereClause" doc:id="7d135c13-bd0f-40cc-b3fe-dd04cdf27b1c" variableName="whereClause"/>
+		<db:select doc:name="Select" doc:id="c6bbb7f1-7dd1-43d2-a479-aa02115e1dd5" config-ref="mysql-connection" >
+			<db:sql ><![CDATA[#["SELECT ARTIST_ID, GROUP_NM, FIRST_NM, LAST_NM, BIRTH_DATE, MI, DEATH_DATE 	
     FROM BC_ARTIST 
-	  WHERE GROUP_NM LIKE :groupName]]></db:sql>
-			<db:input-parameters ><![CDATA[#[{
-	groupName: vars.groupName ++ '%'
-}]]]></db:input-parameters>
+	  WHERE $(vars.whereClause)"]
+
+]]></db:sql>
+			<db:input-parameters ><![CDATA[#[vars.queryParamList]]]></db:input-parameters>
 		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="39b4409c-f5ab-42fb-815b-411cca058ca5" >
+		<ee:transform doc:name="Transform Message" doc:id="54678979-e907-4a48-87b7-524d9ca31cfb" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
 {
-	statusCode: p('http.get.status.ok'),
-	message: p('http.get.message.ok'),
-	searchCriteria: vars.groupName,
-	artists: payload map (artist) -> {
-		artistId: artist.ARTIST_ID,
+	"statusCode": p('http.get.status.ok'),
+	"message": p('http.get.message.ok'),
+	"searchCriteria": ("[" 
+	++ (if(vars.queryParamList.lastName != null) "lastName: '$(((vars.queryParamList.lastName default "")))', " else "")
+	++ (if(vars.queryParamList.firstName != null) "firstName: '$(((vars.queryParamList.firstName default "")))', " else "")
+	++ (if(vars.queryParamList.groupName != null) "groupName: '$(((vars.queryParamList.groupName default "")))', " else "")
+	++ (if(vars.queryParamList.dateOfBirth != null) "birthDate: '$(((vars.queryParamList.dateOfBirth default "")))', " else "")
+    ++ "]"	),	
+    artists: payload map ( artist ) -> {
+		artistId: artist.ARTIST_ID default 0,
 		groupName: artist.GROUP_NM default "",
 		lastName: artist.LAST_NM default "",
 		firstName: artist.FIRST_NM default "",
-		dateOfBirth: artist.BIRTH_DATE as String{
-			format: "yyyy-MM-dd"
-		} default "",
 		mi: artist.MI default "",
-		dateOfDeath: artist.DEATH_DATE as String{
-			format: "yyyy-MM-dd"
-		} default ""
+		dateOfBirth: artist.BIRTH_DATE as String {format: "yyyy-MM-dd"} default "",
+		(if (artist.DEATH_DATE != null) (dateOfDeath: artist.DEATH_DATE as String {format: "yyyy-MM-dd"}) else dateOfDeath: "")
 	}
-}]]></ee:set-payload>
+}
+    ]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+	</sub-flow>
+	<sub-flow name="sr-build-query-param-list" doc:id="c90fc73c-119f-4ec6-bfa4-742f053cd7c2" >
+		<logger level="INFO" doc:name="INFO START" doc:id="983e28cf-5266-4382-a05f-f201450469b7" message="#['sr-build-query-param-list::START::payload: ' ++ write(payload,'application/json')]"/>
+		<ee:transform doc:name="queryParams" doc:id="36804c5a-6620-420c-bb08-130619518253" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	firstName: message.attributes.queryParams.firstName,
+	lastName: message.attributes.queryParams.lastName,
+	dateOfBirth: message.attributes.queryParams.dateOfBirth,
+	groupName: message.attributes.queryParams.groupName
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="INFO END" doc:id="810120bb-12b8-43df-911c-873231fe024f" message="#['sr-build-query-param-list::END::payload: ' ++ write(payload,'application/json')]"/>
 	</sub-flow>
 	<sub-flow name="impl-add-artists" doc:id="7642bb7e-1974-4120-b3bf-af392804ca14" >
 		<logger level="INFO" doc:name="INFO size of" doc:id="86c5bc17-05bc-4f35-bcd3-e96ab0b878fe" message="#['impl-add-artists::START::sizeOf payload: '  ++ sizeOf(payload.artists)]"/>

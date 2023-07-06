@@ -1,0 +1,9 @@
+%dw 2.0
+
+type auto_d644ef0c_6f1b_4e52_8b26_b95a43896f20_Output_Payload = {|
+  statusCode: String, 
+  message: String, 
+  searchCriteria: Null, 
+  artists: Array<{|    artistId: Number,     groupName: String,     lastName: String,     firstName: String,     dateOfBirth: String {"format": "yyyy-MM-dd"},     mi: String,     dateOfDeath: String {"format": "yyyy-MM-dd"}  |}>
+|}
+
