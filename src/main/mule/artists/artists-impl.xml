@@ -91,8 +91,17 @@ message.payload.artists]]></ee:set-variable>
 			<logger level="INFO" doc:name="Payload artist" doc:id="744da7a9-2007-4b28-8d0a-ef585a37ee09" message="#['impl-add-artists::ForEach::payload: ' ++ write(payload,'application/json')]"/>
 			<set-payload doc:name="Artist" doc:id="e9ead0cb-b566-4ffa-9f7d-bdcb7b05385c" value="#[output application/json&#10;---&#10;{&#10;	artist:{&#10;		artistId: payload.aristId,&#10;		groupName: payload.groupName,&#10;		lastName: payload.lastName,&#10;		firstName: payload.firstName,&#10;		mi: payload.mi,&#10;		dateOfBirth: payload.dateOfBirth,&#10;		dateOfDeath: payload.dateOfDeath	&#10;	}&#10;}]"/>
 			<logger level="INFO" doc:name="artist" doc:id="59aa581e-3a3a-4f29-b305-3cce79a9b6f5" message="#['impl-add-artists::ForEach::artist: ' ++ write(payload, 'application/json')]"/>
-			<flow-ref doc:name="sr-insert-Flow" doc:id="8aa54272-d9ee-4405-a0f9-9123eebc0094" name="sr-insert-Flow" target="newArtist"/>
-			<set-variable value="#[%dw 2.0&#10;output application/java&#10;---&#10;vars.artistsOut + vars.newArtist]" doc:name="append artistsOut" doc:id="2701fb1d-ff66-4d2d-9273-4288c6dd15d4" variableName="artistsOut"/>
+			<flow-ref doc:name="sr-find-duplicate-artist" doc:id="e0c4170e-d156-418e-a2c5-63d3e8e995c8" name="sr-find-duplicate-artist" target="getArtistResponse"/>
+			<choice doc:name="Artist Found?" doc:id="f2e56bf8-6350-4885-ab6f-baa95521d2a9" >
+				<when expression="#[vars.getArtistResponse.artists[0]==null]">
+					<flow-ref doc:name="sr-insert-Artist" doc:id="8aa54272-d9ee-4405-a0f9-9123eebc0094" name="sr-insert-Artist" target="newArtist" />
+					<set-variable value="#[%dw 2.0&#10;output application/java&#10;---&#10;vars.artistsOut + vars.newArtist]" doc:name="append artistsOut" doc:id="2701fb1d-ff66-4d2d-9273-4288c6dd15d4" variableName="artistsOut" />
+					<logger level="INFO" doc:name="artistOut" doc:id="b78d54b2-e943-4f4c-85a0-90f09e3686de" message="#['impl-add-artists::ForEach::Choice::artistsOut: ' ++ write(payload,'application/json')]"/>
+				</when>
+				<otherwise >
+					<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;	vars.artistsFound + vars.getArtistResponse.artists[0]]" doc:name="append artistFound" doc:id="f5b01707-dd60-4b79-a4d8-114d81e1b75e" variableName="artistsFound"/>
+				</otherwise>
+			</choice>
 		</foreach>
 		<ee:transform doc:name="Transform Message" doc:id="b8f60c5c-7f06-47fb-afb9-176ea2ce96f7" >
 			<ee:message >
@@ -100,18 +109,27 @@ message.payload.artists]]></ee:set-variable>
 output application/json
 ---
 {
-    "statusCode": p('http.add.status.ok'),
-    "message":    p('http.add.message.ok'),
-    "artistsAdded": 
-   		  vars.artistsOut,
-	"duplicateArtists": 
-  		  vars.artistsFound
+"statusCode": if (sizeOf(vars.artistsFound) > 0) p('http.add.status.partial') else p('http.add.status.ok'),
+"message":  if (sizeOf(vars.artistsFound) > 0) p('http.add.message.partial') else p('http.add.message.ok'),
+    	results: {
+		addedCounts: if (vars.artistsOut[0]==null) "0" else sizeOf(vars.artistsOut), 
+		addedArtists: if (vars.artistsOut[0]==null) "[]" else vars.artistsOut, 
+	duplicatedCounts: if (vars.artistsFound[0]==null) "0" else sizeOf(vars.artistsFound), 
+		duplicatedArtists: if (vars.artistsFound[0]==null) "[]" else vars.artistsFound, 
+	}
 }
 ]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</sub-flow>
-	<sub-flow name="sr-insert-Flow" doc:id="ee572642-5a49-4b59-8095-05b81a1a1c50" >
+	<sub-flow name="sr-find-duplicate-artist" doc:id="1b90a119-bf8c-4a4d-aaec-507369d58bbf" >
+		<logger level="INFO" doc:name="INFO START" doc:id="2c93f766-176b-428f-b68f-b59f699c8416" message="#['sr-find-duplicate-artist::START::payload: ' ++ write(payload,'application/json')]"/>
+		<set-variable value="#[%dw 2.0&#10;output application/java&#10;var artist = message.payload.artist&#10;---&#10;{&#10;    groupName: 	artist.groupName,&#10;    firstName: 	artist.firstName,&#10;    lastName:     artist.lastName,&#10;    dateOfBirth:  artist.dateOfBirth&#10;  }]" doc:name="queryParamList" doc:id="2ae89455-99ac-427f-8e88-d110146ff864" variableName="queryParamList"/>
+		<logger level="INFO" doc:name="Debug queryParamList" doc:id="66c242ec-9d5f-4c8e-aeb8-25f6d832abf5" message="#['sr-find-duplicate-artist::queryParamList' ++ write(vars.queryParamList,'application/json')]"/>
+		<flow-ref doc:name="sr-select-artist" doc:id="6b03e0a5-6734-4398-b9e5-7958c7c0dcba" name="sr-select-artists"/>
+		<logger level="INFO" doc:name="INFO Size of" doc:id="7b072d11-e600-46c8-b256-6438ad5c4021" message="#['sr-find-duplicate-artist' ++ sizeOf(payload.artists)]"/>
+	</sub-flow>
+	<sub-flow name="sr-insert-Artist" doc:id="ee572642-5a49-4b59-8095-05b81a1a1c50" >
 		<logger level="INFO" doc:name="INFO START payload" doc:id="67768664-53c1-45be-9aa1-3ebe0265a1fb" message="#['sr-insert-artist::START::artist: ' ++ write(payload,'application/json')]"/>
 		<set-variable value="#[message.payload.artist]" doc:name="incomingArtist" doc:id="b257eb52-d8e5-48c3-b369-c5fe95ae7545" variableName="incomingArtist"/>
 		<db:insert doc:name="Insert Artist" doc:id="1bb2b836-3d98-4631-bbb2-61215f3e2292" config-ref="mysql-connection">
