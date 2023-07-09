@@ -11,10 +11,11 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 		<db:select doc:name="Select" doc:id="a01233f6-018d-4477-8e5f-06cc5acec0ca" config-ref="mysql-connection">
 			<db:sql ><![CDATA[SELECT DISTINCT ALB.ALBUM_ID, ALB.TITLE, ALB.GENRE, ALB.PUBLICATION_DT, 
   ART.GROUP_NM, ART.ARTIST_ID
-  FROM BC_ALBUM ALB 
-  LEFT OUTER JOIN BC_ARTIST ART 
-  ON ART.ARTIST_ID = ALB.ARTIST_ID
-  WHERE ALB.TITLE LIKE :albumTitle]]></db:sql>
+    FROM BC_ALBUM ALB 
+        LEFT OUTER JOIN BC_ARTIST ART 
+          ON ART.ARTIST_ID = ALB.ARTIST_ID
+    WHERE ALB.TITLE LIKE :albumTitle
+    GROUP BY ALB.TITLE]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{
   albumTitle: vars.albumTitle ++ '%' 
 }]]]></db:input-parameters>
