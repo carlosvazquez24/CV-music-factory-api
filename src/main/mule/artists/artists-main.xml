@@ -6,24 +6,11 @@
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
     <flow name="patch:\artists\(artistId):application\json:cv-music-factory-api-config">
         <set-variable value="artists-main::impl-update-artist-urls" doc:name="Current flow" doc:id="e00c8f03-1201-4b16-b930-f52d0f5a61bb" variableName="currentFlow"/>
-		<flow-ref doc:name="Flow Reference" doc:id="cbe56cc4-6940-4c48-a14d-a8332add3b0e" name="impl-update-artist-urls"/>
+		<flow-ref doc:name="impl-update-artist-urls" doc:id="cbe56cc4-6940-4c48-a14d-a8332add3b0e" name="impl-update-artist-urls"/>
 		<ee:transform>
             <ee:variables>
                 <ee:set-variable variableName="artistId">attributes.uriParams.'artistId'</ee:set-variable>
             </ee:variables>
-        </ee:transform>
-        <ee:transform>
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  statusCode: 201,
-  message: "SUCCESS",
-  bioUrl: "https://last.fm/music/The Beatles/+wiki",
-  recordsUpdated: 3
-}]]></ee:set-payload>
-            </ee:message>
         </ee:transform>
     </flow>
 	<flow name="put:\artists\(artistId):application\json:cv-music-factory-api-config">
