@@ -87,15 +87,16 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 output application/json
 ---
 {
-	statusCode: vars.statusCode,
+	statusCode: vars.statusCode default "500",
 	apiInError: p('api.name') ++ "/" ++ p('api.version'),
-	currentFlow: vars.currentFlow,
-	correlationId: vars.headerAttributes.correlationId,
+	currentFlow: vars.currentFlow default "Undefined",
+	correlationId: vars.headerAttributes.correlationId default "Not Found",
   	error: {
   		"type": (error.errorType.namespace ++ ":" ++ error.errorType.identifier as String) default "Error",
   		detail: (error.description as String) default "Unhandled Exception"
   	}
 }
+
 ]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
