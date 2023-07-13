@@ -54,35 +54,6 @@ output application/json
 	<flow name="post:\albums:application\json:cv-music-factory-api-config">
         <set-variable value="albums-main::impl-add-albums" doc:name="currentFlow" doc:id="08ea3219-93d6-4c4f-8ebb-5f0ca6a9990d" variableName="currentFlow"/>
 		<flow-ref doc:name="Flow Reference" doc:id="c68672d3-429a-486f-8cf4-2e490bbe7de9" name="impl-add-albums"/>
-		<ee:transform>
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  statusCode: 201,
-  message: "SUCCESS",
-  albums: [
-    {
-      albumId: 1001,
-      albumTitle: "Telegraph Canyon I",
-      genre: "Pop",
-      publicationDate: "2016-01-29",
-      artistId: 5,
-      artistName: "His Majesty"
-    }, 
-    {
-      albumId: 1002,
-      albumTitle: "Telegraph Canyon II",
-      genre: "Pop",
-      publicationDate: "2018-01-29",
-      artistId: 5,
-      artistName: "Prince"
-    }
-  ]
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
     </flow>
 	<flow name="delete:\albums\(albumId):cv-music-factory-api-config">
         <ee:transform>
