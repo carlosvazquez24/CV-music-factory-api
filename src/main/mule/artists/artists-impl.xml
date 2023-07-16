@@ -7,7 +7,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 	<sub-flow name="impl-get-artists" doc:id="19434f60-fa56-45b1-bb52-30415497eebb" >
-		<logger level="INFO" doc:name="INFO START" doc:id="36ba1e13-4f3c-4a0b-bfcc-cd9e273b145f" message="impl-get-artists::START"/>
+		<logger level="INFO" doc:name="INFO START" doc:id="36ba1e13-4f3c-4a0b-bfcc-cd9e273b145f" message="impl-get-artists::START" category="${log.cat}"/>
 		<flow-ref doc:name="sr-build-query-param-list" doc:id="88cb9e1c-8ec5-40b7-b835-5105c26d4501" name="sr-build-query-param-list" target="queryParamList" targetValue="#[message.payload]"/>
 		<flow-ref doc:name="sr-select-artists" doc:id="fbe78cda-3e59-4dc3-a9a2-cdb6126bb9b9" name="sr-select-artists"/>
 	</sub-flow>
@@ -88,6 +88,7 @@ output application/json
 message.payload.artists]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
+		<set-variable value="#[[]]" doc:name="artistsFound" doc:id="20707cf0-f620-4e3a-875c-5fd06630cab3" variableName="artistsFound"/>
 		<foreach doc:name="For Each Artist" doc:id="10ad0802-c48b-47ca-80fa-98ef545fc25c" collection="#[vars.artists]">
 			<logger level="INFO" doc:name="Payload artist" doc:id="744da7a9-2007-4b28-8d0a-ef585a37ee09" message="#['impl-add-artists::ForEach::payload: ' ++ write(payload,'application/json')]"/>
 			<set-payload doc:name="Artist" doc:id="e9ead0cb-b566-4ffa-9f7d-bdcb7b05385c" value="#[output application/json&#10;---&#10;{&#10;	artist:{&#10;		artistId: payload.aristId,&#10;		groupName: payload.groupName,&#10;		lastName: payload.lastName,&#10;		firstName: payload.firstName,&#10;		mi: payload.mi,&#10;		dateOfBirth: payload.dateOfBirth,&#10;		dateOfDeath: payload.dateOfDeath	&#10;	}&#10;}]"/>
@@ -110,15 +111,14 @@ message.payload.artists]]></ee:set-variable>
 output application/json
 ---
 {
-"statusCode": if (sizeOf(vars.artistsFound) > 0) p('http.add.status.partial') else p('http.add.status.ok'),
-"message":  if (sizeOf(vars.artistsFound) > 0) p('http.add.message.partial') else p('http.add.message.ok'),
-    	results: {
+	results: {
 		addedCounts: if (vars.artistsOut[0]==null) "0" else sizeOf(vars.artistsOut), 
 		addedArtists: if (vars.artistsOut[0]==null) "[]" else vars.artistsOut, 
-	duplicatedCounts: if (vars.artistsFound[0]==null) "0" else sizeOf(vars.artistsFound), 
+		duplicatedCounts: if (vars.artistsFound[0]==null) "0" else sizeOf(vars.artistsFound), 
 		duplicatedArtists: if (vars.artistsFound[0]==null) "[]" else vars.artistsFound, 
 	}
 }
+
 ]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
