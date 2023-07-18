@@ -667,4 +667,5 @@ type batchReport = {|
       </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
+  <types:enrichment select="#7c90569e-c6ae-47e5-8493-db1aafa3da9e"/>
 </types:mule>

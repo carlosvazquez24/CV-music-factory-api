@@ -7,13 +7,15 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 	<sub-flow name="impl-get-artists" doc:id="19434f60-fa56-45b1-bb52-30415497eebb" >
-		<logger level="INFO" doc:name="INFO START" doc:id="36ba1e13-4f3c-4a0b-bfcc-cd9e273b145f" message="impl-get-artists::START" category="${log.cat}"/>
+		<logger level="INFO" doc:name="INFO START" doc:id="36ba1e13-4f3c-4a0b-bfcc-cd9e273b145f" message="#['impl-get-artists::START::payload:'  ++ write(payload, 'application/json')]" category="${log.cat}"/>
 		<flow-ref doc:name="sr-build-query-param-list" doc:id="88cb9e1c-8ec5-40b7-b835-5105c26d4501" name="sr-build-query-param-list" target="queryParamList" targetValue="#[message.payload]"/>
 		<flow-ref doc:name="sr-select-artists" doc:id="fbe78cda-3e59-4dc3-a9a2-cdb6126bb9b9" name="sr-select-artists"/>
+		<logger level="INFO" doc:name="INFO END" doc:id="05a91739-dd82-45c7-95c3-35fabdaa0f0e" message="#['impl-get-artists::END::payload:'  ++ write(payload, 'application/json')]" category="${logcat}"/>
 	</sub-flow>
 	<sub-flow name="sr-select-artists" doc:id="d644ef0c-6f1b-4e52-8b26-b95a43896f20" >
-		<logger level="INFO" doc:name="INFO START" doc:id="ebf48f54-54c9-4f85-b3ac-931d99d6e41e" message="#['sr-select-artists::START::payload: ' ++ write(payload,'application/json')]"/>
+		<logger level="INFO" doc:name="INFO START" doc:id="ebf48f54-54c9-4f85-b3ac-931d99d6e41e" message="#['sr-select-artists::START::payload: ' ++ write(payload,'application/json')]" category="${logcat}"/>
 		<set-variable value="#[%dw 2.0&#10;   output application/java&#10;---&#10;(&quot;1=1&quot;&#10;	++ (if(vars.queryParamList.lastName != null) &quot; AND lower(LAST_NM) LIKE concat(lower(:lastName),'%')&quot; else &quot;&quot;)&#10;    ++ (if(vars.queryParamList.firstName != null) &quot; AND lower(FIRST_NM) LIKE concat(lower(:firstName),'%')&quot; else &quot;&quot;)&#10;    ++ (if(vars.queryParamList.groupName != null) &quot; AND lower(GROUP_NM) LIKE concat(lower(:groupName),'%')&quot; else &quot;&quot;)&#10;    ++ (if(vars.queryParamList.dateOfBirth != null) &quot; AND BIRTH_DATE = :dateOfBirth&quot; else &quot;&quot;)&#10;) as String]" doc:name="whereClause" doc:id="7d135c13-bd0f-40cc-b3fe-dd04cdf27b1c" variableName="whereClause"/>
+		<logger level="INFO" doc:name="whereClause" doc:id="101726d3-95c9-4d42-9c3d-86941f43ced2" message="#['sr-select-artists::VAR::whereClause: ' ++ write(vars.whereClause,'application/json')]" category="${logcat}"/>
 		<db:select doc:name="Select" doc:id="c6bbb7f1-7dd1-43d2-a479-aa02115e1dd5" config-ref="mysql-connection" >
 			<db:sql ><![CDATA[#["SELECT ARTIST_ID, GROUP_NM, FIRST_NM, LAST_NM, BIRTH_DATE, MI, DEATH_DATE 	
     FROM BC_ARTIST 
@@ -22,6 +24,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 ]]></db:sql>
 			<db:input-parameters ><![CDATA[#[vars.queryParamList]]]></db:input-parameters>
 		</db:select>
+		<logger level="INFO" doc:name="SELECT ARTIST" doc:id="ae6276e8-b396-491f-84df-028b2e5579ed" message="#['sr-select-artists::SELECT::artist: ' ++ write(payload,'application/json')]" category="${logcat}"/>
 		<ee:transform doc:name="Transform Message" doc:id="54678979-e907-4a48-87b7-524d9ca31cfb" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -49,9 +52,10 @@ output application/json
     ]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<logger level="INFO" doc:name="INFO END" doc:id="c19a0417-5d2d-477f-9ccc-624a44a4cff4" message="#['sr-select-artists::END::payload: ' ++ write(payload,'application/json')]" category="${logcat}"/>
 	</sub-flow>
 	<sub-flow name="sr-build-query-param-list" doc:id="c90fc73c-119f-4ec6-bfa4-742f053cd7c2" >
-		<logger level="INFO" doc:name="INFO START" doc:id="983e28cf-5266-4382-a05f-f201450469b7" message="#['sr-build-query-param-list::START::payload: ' ++ write(payload,'application/json')]"/>
+		<logger level="INFO" doc:name="INFO START" doc:id="983e28cf-5266-4382-a05f-f201450469b7" message="#['sr-build-query-param-list::START::payload: ' ++ write(payload,'application/json')]" category="${logcat}"/>
 		<ee:transform doc:name="queryParams" doc:id="36804c5a-6620-420c-bb08-130619518253" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -66,7 +70,7 @@ output application/java
 ]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="INFO END" doc:id="810120bb-12b8-43df-911c-873231fe024f" message="#['sr-build-query-param-list::END::payload: ' ++ write(payload,'application/json')]"/>
+		<logger level="INFO" doc:name="INFO END" doc:id="810120bb-12b8-43df-911c-873231fe024f" message="#['sr-build-query-param-list::END::payload: ' ++ write(payload,'application/json')]" category="${logcat}"/>
 	</sub-flow>
 	<sub-flow name="impl-add-artists" doc:id="7642bb7e-1974-4120-b3bf-af392804ca14" >
 		<logger level="INFO" doc:name="INFO size of" doc:id="86c5bc17-05bc-4f35-bcd3-e96ab0b878fe" message="#['impl-add-artists::START::sizeOf payload: '  ++ sizeOf(payload.artists)]"/>
@@ -124,15 +128,16 @@ output application/json
 		</ee:transform>
 	</sub-flow>
 	<sub-flow name="sr-find-duplicate-artist" doc:id="1b90a119-bf8c-4a4d-aaec-507369d58bbf" >
-		<logger level="INFO" doc:name="INFO START" doc:id="2c93f766-176b-428f-b68f-b59f699c8416" message="#['sr-find-duplicate-artist::START::payload: ' ++ write(payload,'application/json')]"/>
+		<logger level="INFO" doc:name="INFO START" doc:id="2c93f766-176b-428f-b68f-b59f699c8416" message="#['sr-find-duplicate-artist::START::payload: ' ++ write(payload,'application/json')]" category="${logcat}"/>
 		<set-variable value="#[%dw 2.0&#10;output application/java&#10;var artist = message.payload.artist&#10;---&#10;{&#10;    groupName: 	artist.groupName,&#10;    firstName: 	artist.firstName,&#10;    lastName:     artist.lastName,&#10;    dateOfBirth:  artist.dateOfBirth&#10;  }]" doc:name="queryParamList" doc:id="2ae89455-99ac-427f-8e88-d110146ff864" variableName="queryParamList"/>
 		<logger level="INFO" doc:name="Debug queryParamList" doc:id="66c242ec-9d5f-4c8e-aeb8-25f6d832abf5" message="#['sr-find-duplicate-artist::queryParamList' ++ write(vars.queryParamList,'application/json')]"/>
 		<flow-ref doc:name="sr-select-artist" doc:id="6b03e0a5-6734-4398-b9e5-7958c7c0dcba" name="sr-select-artists"/>
-		<logger level="INFO" doc:name="INFO Size of" doc:id="7b072d11-e600-46c8-b256-6438ad5c4021" message="#['sr-find-duplicate-artist' ++ sizeOf(payload.artists)]"/>
+		<logger level="INFO" doc:name="INFO Size of" doc:id="7b072d11-e600-46c8-b256-6438ad5c4021" message="#['sr-find-duplicate-artist' ++ sizeOf(payload.artists)]" category="${logcat}"/>
 	</sub-flow>
 	<sub-flow name="sr-insert-Artist" doc:id="ee572642-5a49-4b59-8095-05b81a1a1c50" >
-		<logger level="INFO" doc:name="INFO START payload" doc:id="67768664-53c1-45be-9aa1-3ebe0265a1fb" message="#['sr-insert-artist::START::artist: ' ++ write(payload,'application/json')]"/>
+		<logger level="INFO" doc:name="INFO START payload" doc:id="67768664-53c1-45be-9aa1-3ebe0265a1fb" message="#['sr-insert-artist::START::artist: ' ++ write(payload,'application/json')]" category="${logcat}"/>
 		<set-variable value="#[message.payload.artist]" doc:name="incomingArtist" doc:id="b257eb52-d8e5-48c3-b369-c5fe95ae7545" variableName="incomingArtist"/>
+		<logger level="INFO" doc:name="Incoming artist" doc:id="70336c31-3f94-4b03-b9d1-e2ae2ab549ae" message="#['sr-insert-artist::VAR::incomingArtist: ' ++ write(vars.incomingArtist,'application/json')]" category="${logcat}"/>
 		<try doc:name="Try" doc:id="66bf5940-1335-4d91-9431-6fa742440a25" >
 			<db:insert doc:name="Insert Artist" doc:id="1bb2b836-3d98-4631-bbb2-61215f3e2292" config-ref="mysql-connection">
 			<db:sql><![CDATA[INSERT INTO BC_MUSIC_FACTORY.BC_ARTIST 
@@ -147,6 +152,7 @@ output application/json
     deathDate: 	vars.incomingArtist.dateOfDeath
 }]]]></db:input-parameters>
 		</db:insert>
+			<logger level="INFO" doc:name="Artist" doc:id="76c2ed06-2fdf-4029-a530-4f695a32a6b7" message="#['sr-insert-artist::INSERT::Artist: ' ++ write(payload,'application/json')]" category="${logcat}"/>
 			<db:select doc:name="Select Insert" doc:id="508152be-2344-4bcd-8b12-701dd889c1f8" config-ref="mysql-connection" target="newArtistId">
 			<db:sql><![CDATA[SELECT MAX(artist_id) AS artist_id from BC_MUSIC_FACTORY.BC_ARTIST
     WHERE GROUP_NM = :groupName 
@@ -164,22 +170,22 @@ output application/json
 			<set-payload value="#[output application/java&#10;var artist = vars.incomingArtist&#10;var newArtistId = vars.newArtistId[0].artist_id default 0&#10;---&#10;{&#10;	artistId: 	newArtistId,&#10;	groupName: 	artist.groupName,&#10;	lastName: 	artist.lastName,&#10;	firstName: 	artist.firstName,&#10;	mi:       	artist.mi,&#10;	dateOfBirth: 	artist.dateOfBirth,&#10;	dateOfDeath:	artist.dateOfDeath&#10;}]" doc:name="Update the payload inserted" doc:id="5473557e-6b51-4e16-a7a6-bb11851770e0" />
 			<error-handler >
 				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="fdf1553f-b63d-4f48-9034-da0d91ec3960" type="DB:QUERY_EXECUTION">
-					<logger level="INFO" doc:name="ERROR" doc:id="7740bb2c-221a-4508-b199-5e24559ff7d1" message="#['sr-insert-artist::OnErrorPropagate::payload: ' ++ write(payload,'application/json')]"/>
+					<logger level="INFO" doc:name="ERROR" doc:id="7740bb2c-221a-4508-b199-5e24559ff7d1" message="#['sr-insert-artist::OnErrorPropagate::payload: ' ++ write(payload,'application/json')]" category="${logcat}"/>
 				</on-error-propagate>
 				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="6e0ecfea-ddf3-44c0-b733-c1b56e5425a6" type="EXPRESSION">
-					<logger level="INFO" doc:name="ERROR" doc:id="a2200e13-9442-4acf-b797-8ed37351e8e6" message="#['sr-insert-artist::OnErrorContinue::payload: ' ++ write(payload,'application/json')]"/>
+					<logger level="INFO" doc:name="ERROR" doc:id="a2200e13-9442-4acf-b797-8ed37351e8e6" message="#['sr-insert-artist::OnErrorContinue::payload: ' ++ write(payload,'application/json')]" category="${logcat}"/>
 				</on-error-continue>
 			</error-handler>
 		</try>
-		<logger level="INFO" doc:name="INFO END payload" doc:id="f23899e9-4d6f-49d8-9ddb-1b719006ef2d" message="#['sr-insert-artist::END:payload: ' ++ write(payload,'application/json')]"/>
+		<logger level="INFO" doc:name="INFO END payload" doc:id="f23899e9-4d6f-49d8-9ddb-1b719006ef2d" message="#['sr-insert-artist::END:payload: ' ++ write(payload,'application/json')]" category="${logcat}"/>
 	</sub-flow>
 	<sub-flow name="impl-update-artist-urls" doc:id="f2a1f707-209f-4c2f-a600-270ffe521c38" >
-		<logger level="INFO" doc:name="INFO START" doc:id="e79b5ff0-69ff-4f1a-aba0-5a80db8084fd" message="#['impl-update-artist-urls::START::payload:'  ++ write(payload, 'application/json')]"/>
+		<logger level="INFO" doc:name="INFO START" doc:id="e79b5ff0-69ff-4f1a-aba0-5a80db8084fd" message="#['impl-update-artist-urls::START::payload:'  ++ write(payload, 'application/json')]" category="${logcat}"/>
 		<set-variable value="#[%dw 2.0&#10;import p from Mule&#10;&#10;output application/java&#10;---&#10;{&#10;	method: p('last.fm.method'),&#10;	apiKey: p('last.fm.api.key'),&#10;	format: p('last.fm.format'),&#10;	artist: payload.groupName&#10;}]" doc:name="lastFmProperties" doc:id="4c8c6e01-f80e-4e4b-a1df-837b3bf588b7" variableName="lastFmProperties"/>
 		<flow-ref doc:name="sr-get-artist-info" doc:id="9c7aedcf-7b03-4c35-8c49-c0afe6e582c1" name="sr-get-artist-info" target="lastFmResponse"/>
 		<choice doc:name="Artist Found?" doc:id="6fb9e1b3-9c14-4c5d-9c0a-ca2defcb8df9" >
 			<when expression='#[vars.lastFmResponse.statusCode=="201"]'>
-				<logger level="INFO" doc:name="Placeholder" doc:id="a241d554-00ee-4ed5-a9b3-4040c7fc6a4f" message="#['impl-update-artists-urls::Choice::Placehoder::payload: ' ++ write(payload,'application/json')]"/>
+				<logger level="INFO" doc:name="Placeholder" doc:id="a241d554-00ee-4ed5-a9b3-4040c7fc6a4f" message="#['impl-update-artists-urls::Choice::Placehoder::payload: ' ++ write(payload,'application/json')]" category="${logcat}"/>
 				<flow-ref doc:name="sr-patch-artist" doc:id="50b0b9e0-fc8a-4fa4-9c32-5c70bf7ceece" name="sr-patch-artist"/>
 			</when>
 			<otherwise >
@@ -194,10 +200,10 @@ vars.lastFmResponse
 				</ee:transform>
 			</otherwise>
 		</choice>
-		<logger level="INFO" doc:name="INFO FINAL RESPONSE" doc:id="3e8d2ea3-461f-452e-9a74-d00d561b023e" message="#['impl-update-artists-urls::FinalResponse::payload: ' ++ write(payload, 'application/json')]"/>
+		<logger level="INFO" doc:name="INFO FINAL RESPONSE" doc:id="3e8d2ea3-461f-452e-9a74-d00d561b023e" message="#['impl-update-artists-urls::FinalResponse::payload: ' ++ write(payload, 'application/json')]" category="${logcat}"/>
 	</sub-flow>
 	<sub-flow name="sr-get-artist-info" doc:id="9d819c42-3dc2-4cdb-a7dd-53a21ac98be5" >
-		<logger level="INFO" doc:name="INFO START" doc:id="14331a12-0792-4f0e-b778-09b60c647085" message="#['sr-get-artist-info::START::payload: ' ++ write(payload, 'application/json')]"/>
+		<logger level="INFO" doc:name="INFO START" doc:id="14331a12-0792-4f0e-b778-09b60c647085" message="#['sr-get-artist-info::START::payload: ' ++ write(payload, 'application/json')]" category="${logcat}"/>
 		<http:request method="GET" doc:name="Get Artist Bio" doc:id="9a38b51e-54b0-42c3-b04d-3773731aee28" config-ref="last-fm-http-config" path="/${last.fm.version}" >
 			<http:query-params ><![CDATA[#[{
 	"method": vars.lastFmProperties.method,
@@ -206,7 +212,7 @@ vars.lastFmResponse
 	"format": vars.lastFmProperties.format
 }]]]></http:query-params>
 		</http:request>
-		<logger level="INFO" doc:name="Debug Get Response" doc:id="fcf84eea-4a66-4ff7-a525-4e6fa134e487" message="#['impl-update-artists-urls::DEBUG:payload: ' ++ write(payload,'application/json')]" />
+		<logger level="INFO" doc:name="Debug Get Response" doc:id="fcf84eea-4a66-4ff7-a525-4e6fa134e487" message="#['impl-update-artists-urls::DEBUG:payload: ' ++ write(payload,'application/json')]" category="${logcat}"/>
 		<ee:transform doc:name="payload" doc:id="8912be9b-8f86-4983-ae83-200cb48692ed" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -225,11 +231,12 @@ bioUrl: if(payload.artist.bio.content != null) (	payload.artist.bio.links.link.h
 ]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="INFO END" doc:id="ddda77bd-19c3-46c1-bb5b-0393b468bec8" message="#['sr-get-artist-info::END::payload:' ++ write(payload,'application/json')]"/>
+		<logger level="INFO" doc:name="INFO END" doc:id="ddda77bd-19c3-46c1-bb5b-0393b468bec8" message="#['sr-get-artist-info::END::payload:' ++ write(payload,'application/json')]" category="${logcat}"/>
 	</sub-flow>
 	<sub-flow name="sr-patch-artist" doc:id="66e96496-f341-4f89-b47f-6d7d35881812" >
-		<logger level="INFO" doc:name="INFO START " doc:id="ac620711-701e-4047-96e7-7f840fd025d4" message="#['sr-patch-artist::START::lastFmResponse: ' ++ write(vars.lastFmResponse,'application/json')]"/>
+		<logger level="INFO" doc:name="INFO START " doc:id="ac620711-701e-4047-96e7-7f840fd025d4" message="#['sr-patch-artist::START::lastFmResponse: ' ++ write(vars.lastFmResponse,'application/json')]" category="${logcat}"/>
 		<set-variable value="#[vars.lastFmResponse.bioUrl]" doc:name="bioUrl" doc:id="a4e16b56-3265-432d-954c-4fd1e88d3a87" variableName="bioUrl"/>
+		<logger level="INFO" doc:name="bioUrl" doc:id="811564d1-dbdd-49f8-a342-62398278544d" message="#['sr-patch-artist::VAR::bioUrl: ' ++ write(vars.bioUrl,'application/json')]" category="${logcat}"/>
 		<db:update doc:name="Update Artist" doc:id="7218477b-ff20-4799-94d7-24a523126176" config-ref="mysql-connection">
 			<db:sql ><![CDATA[UPDATE BC_ARTIST
   SET bio_url = :bioUrl
@@ -241,6 +248,6 @@ bioUrl: if(payload.artist.bio.content != null) (	payload.artist.bio.links.link.h
 }]]]></db:input-parameters>
 		</db:update>
 		<set-payload value="#[%dw 2.0&#10;output application/json&#10;var FOUND_STATUS = p('http.get.status.ok')&#10;var FOUND_MESSAGE = p('http.get.message.ok')&#10;---&#10;{&#10;	statusCode: FOUND_STATUS,&#10;	message: FOUND_MESSAGE,&#10;	bioUrl: vars.bioUrl,&#10;	recordsUpdated: payload.affectedRows&#10;}]" doc:name="Set Payload" doc:id="11787251-e7a4-4946-b3b9-ff4e121c91ad" />
-		<logger level="INFO" doc:name="INFO END payload" doc:id="ad6ed3e3-f8ae-47c8-a11e-1c23093983a3" message="#['sr-patch-artist::END::payload: ' ++ write(payload,'application/json')]"/>
+		<logger level="INFO" doc:name="INFO END payload" doc:id="ad6ed3e3-f8ae-47c8-a11e-1c23093983a3" message="#['sr-patch-artist::END::payload: ' ++ write(payload,'application/json')]" category="${logcat}"/>
 	</sub-flow>
 </mule>

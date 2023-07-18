@@ -6,8 +6,9 @@
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
     <sub-flow name="impl-get-songs" doc:id="984c8f73-b94f-4b26-9ac5-2e2842765939" >
-		<logger level="INFO" doc:name="INFO START" doc:id="917ea14e-d089-49d1-af0d-f5f469075ece" message="impl-get-songs::START"/>
+		<logger level="INFO" doc:name="INFO START" doc:id="917ea14e-d089-49d1-af0d-f5f469075ece" message="impl-get-songs::START" category="${logcat}"/>
 		<set-variable value="#[message.attributes.queryParams.songTitle]" doc:name="songTitle" doc:id="9812ad0a-f95a-49e2-8468-afbc59c80cd6" variableName="songTitle"/>
+		<logger level="INFO" doc:name="songTitle" doc:id="9dd791ca-8309-4cbd-a3e7-64dbdc629e7b" message="#['impl-get-songs::VAR::songTitle' ++ write(vars.songTitle, 'application/json')]" category="${logcat}"/>
 		<db:select doc:name="Select songs" doc:id="edcf773c-fb1d-4aac-bde6-953f3558b9aa" config-ref="mysql-connection">
 			<db:sql ><![CDATA[SELECT SNG.SONG_ID, SNG.SONG_TITLE, SNG.PUBLICATION_DT, SNG.GENRE, 
 SNG.DURATION,ALB.TITLE AS ALBUM_NM, ART.GROUP_NM, ALB.ALBUM_ID
@@ -19,6 +20,7 @@ SNG.DURATION,ALB.TITLE AS ALBUM_NM, ART.GROUP_NM, ALB.ALBUM_ID
 WHERE SONG_TITLE LIKE :songTitle ]]></db:sql>
 			<db:input-parameters ><![CDATA[#[{songTitle: vars.songTitle ++ '%'}]]]></db:input-parameters>
 		</db:select>
+		<logger level="INFO" doc:name="SELECT" doc:id="7c0c1d9b-60d0-4761-9f9b-f10428005210" message="#['impl-get-songs::SELECT::payload:'  ++ write(payload, 'application/json')]" category="${logcat}"/>
 		<ee:transform doc:name="Transform Message" doc:id="0a711749-13f1-4d62-8aca-ee73cbf844ce" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -43,6 +45,7 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<logger level="INFO" doc:name="INFO END" doc:id="081f5f89-cbd4-4312-a373-90ed6e663472" message="#['impl-get-songs::END::payload:'  ++ write(payload, 'application/json')]" category="${logcat}"/>
 	
 </sub-flow>
 </mule>
