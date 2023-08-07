@@ -100,7 +100,7 @@ output application/json
 ]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<sps-logger:sps-logger doc:name="Exception Response" doc:id="25f9fe29-3538-4697-8206-949c9827fdab" config-ref="SPS_Logger_Config" targetSystem="Error handling" eventName="EXCEPTION" level="ERROR" correlationId="#[vars.headerAttributes.correlationId]" statusCode="#[payload.statusCode]" errorType="#[payload.error.'type']" errorDetail="#[payload.error.detail]" category="com.puntosingular.soluciones"/>
+		<sps-logger:sps-logger doc:name="Exception Response" doc:id="25f9fe29-3538-4697-8206-949c9827fdab" config-ref="SPS_Logger_Config" targetSystem="Error handling" eventName="EXCEPTION" level="ERROR" correlationId="#[vars.headerAttributes.correlationId]" statusCode="#[payload.statusCode]" errorType="#[payload.error.'type']" errorDetail="#[payload.error.detail]" category="${logcat}"/>
 	</sub-flow>
 
 
