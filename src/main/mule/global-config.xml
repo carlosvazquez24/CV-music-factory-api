@@ -28,8 +28,6 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
     	<secure-properties:encrypt algorithm="Blowfish" />
 	</secure-properties:config>
 
-    <!-- This is the configuration to let this mule app talk to API Manager's corresponding API -->
-    <api-gateway:autodiscovery apiId="${api.apiId}" doc:name="API Autodiscovery" doc:id="64e53ea9-8f3d-4165-8451-fc9e075835f3" flowRef="cv-music-factory-api-main" ignoreBasePath="true"/>
 
     <!-- Added to expedite the Bootcamp project archetype -->
 	<global-property doc:name="Global Property" doc:id="0a76d4c0-842d-40b6-9fc5-2f5cf73b0360" name="secureKey" value="password" />
@@ -49,7 +47,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	<http:request-config name="last-fm-http-config" doc:name="HTTP Request configuration" doc:id="99d7bc95-462a-4185-a790-ac2d5d35f9a5" >
 		<http:request-connection host="${last.fm.host}" port="${last.fm.port}" />
 	</http:request-config>
-	<api-gateway:autodiscovery apiId="${api.apiId}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="825cd032-55d1-4cd7-9427-ab773cdc5335" flowRef="cv-music-factory-api-main" />
+	<api-gateway:autodiscovery apiId="${api.apiId}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="baf45733-73bd-4f1a-9228-b5421e8f2f09" flowRef="cv-music-factory-api-main" />
 	<error-handler name="globalErrorHandler">
             <on-error-propagate type="APIKIT:BAD_REQUEST" enableNotifications="true" logException="false">
 				<set-variable value="400" doc:name="Set HTTP Status code" doc:id="1d6586fd-fb35-42e5-8bdc-3c21840bba73" variableName="statusCode"/>

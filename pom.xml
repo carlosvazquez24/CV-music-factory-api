@@ -23,7 +23,7 @@
 			<plugin>
 				<groupId>org.mule.tools.maven</groupId>
 				<artifactId>mule-maven-plugin</artifactId>
-				<version>${mule.maven.plugin.version}</version>
+				<version>3.5.4</version>
 				<extensions>true</extensions>
 				<configuration>
 					<sharedLibraries>
@@ -92,13 +92,6 @@
 			<classifier>mule-plugin</classifier>
 		</dependency>
 		<dependency>
-			<groupId>be378432-2ee8-43ac-b0d3-68776a49aca9</groupId>
-			<artifactId>cv-music-factory-api</artifactId>
-			<version>1.0.0</version>
-			<classifier>raml</classifier>
-			<type>zip</type>
-		</dependency>
-		<dependency>
 			<groupId>org.mule.connectors</groupId>
 			<artifactId>mule-db-connector</artifactId>
 			<version>1.14.0</version>
@@ -128,6 +121,13 @@
 			<artifactId>assertions</artifactId>
 			<version>1.0.2</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>be378432-2ee8-43ac-b0d3-68776a49aca9</groupId>
+			<artifactId>cv-music-factory-api</artifactId>
+			<version>1.1.0</version>
+			<classifier>raml</classifier>
+			<type>zip</type>
 		</dependency>
 	</dependencies>
 

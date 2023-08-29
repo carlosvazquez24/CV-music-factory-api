@@ -17,7 +17,7 @@ http://www.mulesoft.org/schema/mule/sps-logger http://www.mulesoft.org/schema/mu
 		<sps-logger:sps-logger doc:name="INFO START" doc:id="2c56fd7a-1352-4361-983d-d72d5bda3c76" config-ref="SPS_Logger_Config" eventName="START" message="#['sr-select-artists::START::payload' ++ write(payload, &quot;application/json&quot;)]" category="${logcat}" />
 		<set-variable value="#[%dw 2.0&#10;   output application/java&#10;---&#10;(&quot;1=1&quot;&#10;	++ (if(vars.queryParamList.lastName != null) &quot; AND lower(LAST_NM) LIKE concat(lower(:lastName),'%')&quot; else &quot;&quot;)&#10;    ++ (if(vars.queryParamList.firstName != null) &quot; AND lower(FIRST_NM) LIKE concat(lower(:firstName),'%')&quot; else &quot;&quot;)&#10;    ++ (if(vars.queryParamList.groupName != null) &quot; AND lower(GROUP_NM) LIKE concat(lower(:groupName),'%')&quot; else &quot;&quot;)&#10;    ++ (if(vars.queryParamList.dateOfBirth != null) &quot; AND BIRTH_DATE = :dateOfBirth&quot; else &quot;&quot;)&#10;) as String]" doc:name="whereClause" doc:id="7d135c13-bd0f-40cc-b3fe-dd04cdf27b1c" variableName="whereClause"/>
 		<sps-logger:sps-logger doc:name="whereClause" doc:id="5d74ba43-1473-4214-adc2-5315262c7cb7" config-ref="SPS_Logger_Config" level="WARN" message="#['sr-select-artists' ++ write(vars.whereClause, &quot;application/json&quot;)]" category="${logcat}"/>
-		<db:select doc:name="Select" doc:id="c6bbb7f1-7dd1-43d2-a479-aa02115e1dd5" config-ref="mysql-connection" >
+		<db:select doc:name="Select" doc:id="c6bbb7f1-7dd1-43d2-a479-aa02115e1dd5" config-ref="${db.config}" >
 			<db:sql ><![CDATA[#["SELECT ARTIST_ID, GROUP_NM, FIRST_NM, LAST_NM, BIRTH_DATE, MI, DEATH_DATE 	
     FROM BC_ARTIST 
 	  WHERE $(vars.whereClause)"]

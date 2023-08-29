@@ -73,5 +73,43 @@ output application/json
             </ee:message>
         </ee:transform>
     </flow>
+	<flow name="get:\albums\(albumId)\media:cv-music-factory-api-config" doc:id="9fcb775a-ecc7-4306-9ca6-b360e827c998" >
+		<ee:transform doc:name="Transform Message" doc:id="a8cbad2a-197a-434f-956c-3720263fdeb3" >
+			<ee:variables >
+				<ee:set-variable variableName="albumId" ><![CDATA[attributes.uriParams.'albumId']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message1" doc:id="7032401c-af6a-4794-9e04-c646526cd0fd" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  statusCode: 200,
+  message: "SUCCESS",
+  media: [
+    {
+      albumId: 2,
+      albumName: "Let It Be",
+      mediaType: "CD",
+      availabilityDate: "2000-05-18"
+    }, 
+    {
+      albumId: 2,
+      albumName: "Let It Be",
+      mediaType: "Cassette",
+      availabilityDate: "1975-04-22"
+    }, 
+    {
+      albumId: 2,
+      albumName: "Let It Be",
+      mediaType: "Vinyl",
+      availabilityDate: "1970-11-18"
+    }
+  ]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
 
 	</mule>
