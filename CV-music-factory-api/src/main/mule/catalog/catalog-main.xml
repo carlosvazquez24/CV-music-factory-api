@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <flow name="get:\catalog:cv-music-factory-api-config">
+        <set-variable value="catalog-main::impl-get-catalog" doc:name="currentFlow" doc:id="661242fa-6ecf-4cac-bbc8-1b90339b04c7" variableName="currentFlow"/>
+		<flow-ref doc:name="Flow Reference" doc:id="3e13eb56-ebaa-447d-8eb1-a443ca35d947" name="impl-get-catalog"/>
+    </flow>
+</mule>

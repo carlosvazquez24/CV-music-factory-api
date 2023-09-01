@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <flow name="patch:\artists\(artistId):application\json:cv-music-factory-api-config">
+        <set-variable value="artists-main::impl-update-artist-urls" doc:name="Current flow" doc:id="e00c8f03-1201-4b16-b930-f52d0f5a61bb" variableName="currentFlow"/>
+		<flow-ref doc:name="impl-update-artist-urls" doc:id="cbe56cc4-6940-4c48-a14d-a8332add3b0e" name="impl-update-artist-urls"/>
+		<ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="artistId">attributes.uriParams.'artistId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+    </flow>
+	<flow name="put:\artists\(artistId):application\json:cv-music-factory-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="artistId">attributes.uriParams.'artistId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  statusCode: 200,
+  message: "The artist has been updated."
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+	<flow name="delete:\artists\(artistId):cv-music-factory-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="artistId">attributes.uriParams.'artistId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  statusCode: 200,
+  message: "The artist has been deleted."
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+	<flow name="get:\artists:cv-music-factory-api-config">
+        <set-variable value="artists-main::impl-get-artists" doc:name="Current flow" doc:id="d0f07d64-e016-446e-add7-240183a50fc6" variableName="currentFlow"/>
+		<flow-ref doc:name="Flow Reference" doc:id="1eda7215-8076-441d-9c05-d907cb016d8a" name="impl-get-artists"/>
+    </flow>
+	<flow name="get:\artists\(artistId)\songs:cv-music-factory-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="artistId">attributes.uriParams.'artistId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  statusCode: 200,
+  message: "SUCCESSFUL",
+  artistSongs: [
+    {
+      songTitle: "Hey Jude",
+      publicationDate: "1968-08-26",
+      genre: "Rock",
+      artist: {
+        groupName: "The Beatles",
+        firstName: "John",
+        lastName: "Lennon"
+      }
+    }, 
+    {
+      songTitle: "Magical Mystery Tour",
+      publicationDate: "1967-03-15",
+      genre: "Rock",
+      artist: {
+        groupName: "The Beatles",
+        firstName: "John",
+        lastName: "Lennon"
+      }
+    }
+  ]
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+	<flow name="get:\artists\(artistId):cv-music-factory-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="artistId">attributes.uriParams.'artistId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  statusCode: 200,
+  message: "SUCCESSFUL",
+  artist: {
+    groupName: "Grateful Dead",
+    firstName: "Garcia",
+    lastName: "Gerry",
+    dateOfBirth: "1948-01-07"
+  }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\artists:application\json:cv-music-factory-api-config">
+        <set-variable value="artists-main::impl-add-artists" doc:name="currentFlow" doc:id="db3632f2-6f68-4a6f-870f-9b21460e16f4" variableName="currentFlow"/>
+		<flow-ref doc:name="Flow Reference" doc:id="16b53e0b-0dfe-434e-8dc3-7be8a02a4f9f" name="impl-add-artists"/>
+    </flow>
+</mule>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:sps-logger="http://www.mulesoft.org/schema/mule/sps-logger" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/sps-logger http://www.mulesoft.org/schema/mule/sps-logger/current/mule-sps-logger.xsd">
+	<sub-flow name="impl-get-catalog" doc:id="e09fcf6c-5872-4259-970f-4dcbdfde7006" >
+		<sps-logger:sps-logger doc:name="INFO START" doc:id="c25f3ac3-7c2a-4731-80e4-bdb3d63462b5" config-ref="SPS_Logger_Config" eventName="START" message="#['impl-get-catalog::START:payload' ++ write(payload, &quot;application/json&quot;)]" category="${logcat}" />
+		<sps-logger:sps-logger doc:name="Group Name" doc:id="b781ef39-b5d1-4946-bcf2-daf81b223b94" config-ref="SPS_Logger_Config" message="#['impl-get-catalog::VAR::groupName' ++ write(vars.groupName, &quot;application/json&quot;)]" category="${logcat}"/>
+		<db:select doc:name="Select CATALOG" doc:id="3cf141c4-92fc-4d84-aad6-cf8612fecbd5" config-ref="mysql-connection">
+			<db:sql ><![CDATA[SELECT ALBUM.TITLE AS ALBUM_NM, ALBUM.PUBLICATION_DT AS ALBUM_PUBLISH,
+	   SONG.SONG_TITLE, SONG.GENRE AS SONG_GENRE, SONG.DURATION AS SONG_DURATION, 
+       ARTIST.GROUP_NM, ARTIST.LAST_NM AS ARTIST_LAST, ARTIST.FIRST_NM AS ARTIST_FIRST, DATE_FORMAT(ARTIST.BIRTH_DATE, "%Y-%m-%d") AS ARTIST_BIRTH, ifnull(ARTIST.DEATH_DATE,"") AS ARTIST_DEATH
+	FROM BC_ALBUM ALBUM
+        LEFT OUTER JOIN BC_ARTIST ARTIST 
+          ON ALBUM.GROUP_NM = ARTIST.GROUP_NM
+        LEFT OUTER JOIN BC_SONG SONG 
+          ON SONG.ARTIST_NM = ARTIST.GROUP_NM
+      WHERE ARTIST.GROUP_NM LIKE :groupName
+      GROUP BY ALBUM_NM, SONG_TITLE, ARTIST_LAST	
+      ORDER BY ALBUM_NM, SONG_TITLE, ARTIST_LAST
+]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	groupName: attributes.queryParams.groupName ++ "%"
+}]]]></db:input-parameters>
+		</db:select>
+		<sps-logger:sps-logger doc:name="SELECT CATALOG" doc:id="61c3f243-4bfd-49c9-a2ff-4980cb54f45f" config-ref="SPS_Logger_Config" eventName="AFTER REQUEST" message="#['impl-get-catalog::SELECT::payload' ++ write(payload, &quot;application/json&quot;)]" category="${logcat}"/>
+		<ee:transform doc:name="payload" doc:id="eef3eea1-aaeb-4c66-ad3a-fc9f947b1bae" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var catalogQuery = payload
+fun formatDate(d: Date) = d as String {format: "MM/dd/YYYY"}
+---
+{
+   "albums": (catalogQuery groupBy $.ALBUM_NM mapObject(albumsGroup, agKey) ->(
+       "album": {
+           "albumTitle":       agKey,
+           "publicationDate":  formatDate(albumsGroup.ALBUM_PUBLISH[0]),
+           "groupName":        albumsGroup.GROUP_NM[0],
+           "songs": (albumsGroup groupBy $.SONG_TITLE mapObject (songsGroup, sgKey) ->(
+               "song": {
+                   "songTitle":    sgKey,
+                   "genre":        songsGroup.SONG_GENRE[0],
+                   "songDuration": songsGroup.SONG_DURATION[0],
+                   "songWriters": (songsGroup groupBy $.ARTIST_LAST mapObject (artistsGroup, agKey)->(
+                        "writer": {
+                            "writer": artistsGroup.ARTIST_FIRST[0] ++ " " ++ artistsGroup.ARTIST_LAST[0],
+                            "lifeDates": 
+                            (if (artistsGroup.ARTIST_DEATH[0] != "")
+                                (
+                                    "lifeDates": formatDate(artistsGroup.ARTIST_BIRTH[0]) ++ "-" ++ formatDate(artistsGroup.ARTIST_DEATH[0])
+                                )
+                                else "lifeDates": formatDate(artistsGroup.ARTIST_BIRTH[0]))
+                        }
+                       )).*writer orderBy $.writer
+
+
+                   }
+                )).*song orderBy $.songTitle    
+
+       }
+  )).*album orderBy $.publicationDate
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<sps-logger:sps-logger doc:name="INFO END" doc:id="dedd3fe1-5b9e-486a-99ba-df0139925784" config-ref="SPS_Logger_Config" eventName="END" message="#['impl-get-catalog::END:payload' ++ write(payload, &quot;application/json&quot;)]" category="${logcat}" />
+	</sub-flow>
+</mule>

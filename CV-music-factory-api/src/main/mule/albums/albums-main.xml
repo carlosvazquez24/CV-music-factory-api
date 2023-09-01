@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <flow name="put:\albums\(albumId):application\json:cv-music-factory-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="albumId">attributes.uriParams.'albumId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  statusCode: 200,
+  message: "The album has been updated."
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\albums\(albumId):cv-music-factory-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="albumId">attributes.uriParams.'albumId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  statusCode: 200,
+  message: "SUCCESS",
+  album: {
+    albumTitle: "Let It Be (CD)",
+    genre: "Rock",
+    publicationDate: "2000-05-18",
+    artistId: 1,
+    artistName: "The Beatles"
+  }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+	<flow name="get:\albums:cv-music-factory-api-config">
+        <set-variable value="albums-main::impl-get-albums" doc:name="currentFlow" doc:id="8b1dbf34-c997-4241-a6ba-e9456c20f7f0" variableName="currentFlow"/>
+		<flow-ref doc:name="Flow Reference" doc:id="f2f7d28c-ce4e-408f-ba3b-b8c32edee837" name="impl-get-albums"/>
+    </flow>
+	<flow name="post:\albums:application\json:cv-music-factory-api-config">
+        <set-variable value="albums-main::impl-add-albums" doc:name="currentFlow" doc:id="08ea3219-93d6-4c4f-8ebb-5f0ca6a9990d" variableName="currentFlow"/>
+		<flow-ref doc:name="Flow Reference" doc:id="c68672d3-429a-486f-8cf4-2e490bbe7de9" name="impl-add-albums"/>
+    </flow>
+	<flow name="delete:\albums\(albumId):cv-music-factory-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="albumId">attributes.uriParams.'albumId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  statusCode: 200,
+  message: "The album has been deleted."
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+	<flow name="get:\albums\(albumId)\media:cv-music-factory-api-config" doc:id="9fcb775a-ecc7-4306-9ca6-b360e827c998" >
+		<ee:transform doc:name="Transform Message" doc:id="a8cbad2a-197a-434f-956c-3720263fdeb3" >
+			<ee:variables >
+				<ee:set-variable variableName="albumId" ><![CDATA[attributes.uriParams.'albumId']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message1" doc:id="7032401c-af6a-4794-9e04-c646526cd0fd" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+  statusCode: 200,
+  message: "SUCCESS",
+  media: [
+    {
+      albumId: 2,
+      albumName: "Let It Be",
+      mediaType: "CD",
+      availabilityDate: "2000-05-18"
+    }, 
+    {
+      albumId: 2,
+      albumName: "Let It Be",
+      mediaType: "Cassette",
+      availabilityDate: "1975-04-22"
+    }, 
+    {
+      albumId: 2,
+      albumName: "Let It Be",
+      mediaType: "Vinyl",
+      availabilityDate: "1970-11-18"
+    }
+  ]
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+
+	</mule>

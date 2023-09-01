@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="put:\songs\(songId):application\json:cv-music-factory-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="songId">attributes.uriParams.'songId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  statusCode: 200,
+  message: "The song has been updated."
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+	<flow name="delete:\songs\(songId):cv-music-factory-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="songId">attributes.uriParams.'songId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  statusCode: 200,
+  message: "The song has been deleted."
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+	<flow name="get:\songs\(songId):cv-music-factory-api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="songId">attributes.uriParams.'songId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  statusCode: 200,
+  message: "SUCCESS",
+  song: {
+    songTitle: "Don't Mess With Texas",
+    publicationDate: "2016-10-05",
+    genre: "Pop",
+    duration: "3:15",
+    songId: 15,
+    artistId: 5,
+    songWriters: [
+      {
+        writer: "Ted Cruz"
+      }, 
+      {
+        writer: "Greg Abbott"
+      }
+    ]
+  }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+	<flow name="post:\songs:application\json:cv-music-factory-api-config">
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  statusCode: 201,
+  message: "SUCCESS",
+  songs: [
+    {
+      songTitle: "Como Anda La Cucaracha",
+      publicationDate: "1954-01-07",
+      duration: "4:29",
+      genre: "Mariachi",
+      albumId: 6,
+      artistId: 101
+    }, 
+    {
+      songTitle: "La Bamba",
+      publicationDate: "1959-03-30",
+      duration: "3:52",
+      genre: "Other",
+      albumId: 7,
+      artistId: 102
+    }
+  ]
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    
+    
+    <flow name="get:\songs:cv-music-factory-api-config">
+        <set-variable value="songs-main::impl-get-songs" doc:name="currentFlow" doc:id="112556e2-5fb3-499c-8e00-fb8903851b82" variableName="currentFlow"/>
+		<flow-ref doc:name="Flow Reference" doc:id="631c186c-75f7-405d-a939-cad60846f49f" name="impl-get-songs"/>
+    </flow>
+</mule>

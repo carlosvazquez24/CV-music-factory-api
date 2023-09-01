@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="artists-impl-test-suite.xml" />
+	<global-property doc:name="Global Property" doc:id="a3e48fa4-e529-42da-90e6-fa318caba84f" name="test" value="local" />
+	<configuration-properties doc:name="Configuration properties" doc:id="53e395ff-2a19-4bfc-95f1-b5a517fa6595" file="properties/${test}.properties" />
+	<munit:test name="sr-get-artist-info-test" doc:id="6b3f388a-8613-4e8f-8e6c-6a8ce810946c" description="Test" ignore="true">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when Get Artist HTTP Request" doc:id="f09d3f1d-5a9b-4edc-a24b-f0ad38ec5992" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="GET" attributeName="method" />
+					<munit-tools:with-attribute whereValue="Get Artist Bio" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="9a38b51e-54b0-42c3-b04d-3773731aee28" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="last-fm-http-config" attributeName="config-ref" />
+					<munit-tools:with-attribute whereValue="/${last.fm.version}" attributeName="path" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[readUrl("classpath://examples/lastFmResponseValid.json","application/json")]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="lastFmProperties" doc:id="d1ae7445-2446-4506-99a5-92fcbcd10034" >
+				<munit:variables >
+					<munit:variable key="lastFmProperties" value="#[{method: p('last.fm.method'), apiKey: p('last.fm.api.key'), format: p('last.fm.format'), artist: 'The Beatles' }]" mediaType="application/java" />
+					<munit:variable key="headerAttributes" value="#[{correlationId: '12345', clientId: '12345', clientSecret: '12345'}]" mediaType="application/java" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="sr-get-artist-info" doc:id="08965fe5-2bb5-4af8-a5f3-3463ceb848d3" name="sr-get-artist-info"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call" doc:id="c926a099-145e-4a6a-85a3-f80b255e83c8" processor="http:request" times="#[1]">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="GET" attributeName="method" />
+					<munit-tools:with-attribute whereValue="Get Artist Bio" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="9a38b51e-54b0-42c3-b04d-3773731aee28" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="last-fm-http-config" attributeName="config-ref" />
+					<munit-tools:with-attribute whereValue="/${last.fm.version}" attributeName="path" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert-equals doc:name="Assert statusCode is 201" doc:id="0462ae90-f794-4f17-8a66-42e7c529fbf3" actual="#[message.payload.statusCode]" expected="201" message="statusCode is 201"/>
+			<munit-tools:assert-that doc:name="Assert that bioUrl Found" doc:id="67168701-57b1-4173-9451-42d168875f28" expression="#[payload.bioUrl]" is='#[MunitTools::startsWith("https://")]' message="bioUrl Found"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="artists-impl-get-artists-test" doc:id="1e9ea30c-4ace-4509-a5f4-4d5661abdfe5" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="3e4c21a1-728a-42f2-86c8-ecc1472b13ac" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="c6bbb7f1-7dd1-43d2-a479-aa02115e1dd5" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[output application/java&#10;---&#10;[{&#10;	ARTIST_ID: 2,&#10;	GROUP_NM: "MUnit Test",&#10;	FIRST_NM: "John",&#10;	LAST_NM: "Lennon",&#10;	BIRTH_DATE: "1940-01-01",&#10;	DEATH_DATE: "1980-11-01"&#10;}]]' mediaType="application/java" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="1e6830aa-4a73-40f2-a256-4f3b1559f668" >
+				<munit:attributes value='#[{queryParams: {"groupName":"MUnit Test"}}]' />
+				<munit:variables >
+					<munit:variable key="headerAttributes" value="#[{correlationId: '12345', clientId: '12345', clientSecret: '12345'}]" mediaType="application/java" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="impl-get-artists" doc:id="4dee812f-d7c5-4d08-b856-309c44d3096c" name="impl-get-artists"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that NOT null" doc:id="066418f6-10b5-4a94-92e8-0b54f7c41f91" message="NOT null" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+			<munit-tools:assert-that doc:name="Assert that Artist firstName" doc:id="b93a6d77-16e3-477f-8d0a-836c1f4fa79e" message="NOT John" expression="#[payload.artists[0].firstName as String]" is="#[MunitTools::startsWith('John')]"/>
+			<munit-tools:assert-that doc:name="Assert that Artist lastName" doc:id="28bf880d-bd1c-4c05-aada-acc7864ce3f4" message="NOT Lennon" expression="#[payload.artists[0].lastName as String]" is="#[MunitTools::startsWith('Lennon')]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

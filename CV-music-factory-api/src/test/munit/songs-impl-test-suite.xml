@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="songs-impl-test-suite.xml" />
+	<munit:test name="songs-impl-get-songs-test" doc:id="aac74f05-7ab1-4664-b653-6ac97c5cd0c7" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="eeb28177-d911-44db-aaeb-4a389b3c1ada" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="edcf773c-fb1d-4aac-bde6-953f3558b9aa" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[output application/java&#10;---&#10;[{&#10;	SONG_ID: 7,&#10;	SONG_TITLE: "MUnit Test",&#10;	GENRE: "Rock",&#10;	PUBLICATION_DT: "1970-03-23",&#10;	DURATION: "3:58",&#10;	ALBUM_NM: "Let it Be",&#10;	ARTIST_NM: "The Beatles",&#10;	ALBUM_ID: 1&#10;}]]' mediaType="application/java" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="songTitle-queryParam" doc:id="7dc9b0ed-6c6e-473f-9a54-1927c149e6c2" >
+				<munit:attributes value="#[{queryParams: {'songTitle':'Dig'}}]" />
+				<munit:variables >
+					<munit:variable key="headerAttributes" value="{correlationId: '12345', clientId: '12345', clientSecret: '12345'}" mediaType="application/java" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="impl-get-songs" doc:id="ae46dd34-f68b-4466-8267-b64f698875d0" name="impl-get-songs"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="509bc7c0-ed0c-4d35-acfe-27c4097c4669" expression="#[payload]" is="#[MunitTools::notNullValue()]" message="NOT NULL"/>
+			<munit-tools:assert-that doc:name="Assert that Size = 1" doc:id="e2fa74cb-19df-489b-9751-09795ef04395" expression="#[sizeOf (payload.songs)]" is="#[MunitTools::equalTo(1)]" message="SIZE = 1"/>
+			<munit-tools:assert-that doc:name="Assert that songTitle" doc:id="a38f8085-dbb8-401b-bb33-8f08996266bb" expression="#[payload.songs[0].songTitle as String]" is="#[MunitTools::containsString('MUnit Test')]" message="songTitle"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

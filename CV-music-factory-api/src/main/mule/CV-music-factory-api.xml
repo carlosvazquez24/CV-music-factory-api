@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:sps-logger="http://www.mulesoft.org/schema/mule/sps-logger" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/sps-logger http://www.mulesoft.org/schema/mule/sps-logger/current/mule-sps-logger.xsd">
+	<flow name="cv-music-factory-api-main">
+        <http:listener config-ref="http-listener-config" path="/${http.router.path}/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <ee:transform doc:name="Header attributes &amp; currentFlow" doc:id="7c90569e-c6ae-47e5-8493-db1aafa3da9e" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="headerAttributes" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	correlationId: message.attributes.headers.correlation_id default uuid(),
+	clientId: message.attributes.headers.client_id default "",
+	clientSecret: message.attributes.headers.client_secret default ""
+}
+]]></ee:set-variable>
+				<ee:set-variable variableName="currentFlow" ><![CDATA[%dw 2.0
+output application/json
+var currentFlow = "cv-music-factory-api-main::apiKitRouter"
+---
+currentFlow
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<sps-logger:sps-logger doc:name="INFO START" doc:id="2e7ee58f-8878-4e84-969b-f218d0e25557" targetSystem="APIKIT" eventName="START" message="#['CV-music-factory-api-main::payload: ' ++ write(payload, &quot;application/json&quot;)]" category="${logcat}"/>
+		<apikit:router config-ref="cv-music-factory-api-config"/>
+    </flow>
+    <flow name="cv-music-factory-api-console">
+        <http:listener config-ref="http-listener-config" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="cv-music-factory-api-config"/>
+    </flow>
+
+</mule>
