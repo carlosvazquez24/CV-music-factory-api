@@ -1,9 +1,0 @@
-%dw 2.0
-
-type auto_66e96496_f341_4f89_b47f_6d7d35881812_Output_Payload = {|
-  statusCode: String, 
-  message: String, 
-  bioUrl: Null, 
-  recordsUpdated: Number | Null
-|}
-

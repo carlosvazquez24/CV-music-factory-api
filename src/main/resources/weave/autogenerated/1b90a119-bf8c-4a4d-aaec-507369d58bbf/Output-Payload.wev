@@ -1,9 +1,0 @@
-%dw 2.0
-
-type auto_1b90a119_bf8c_4a4d_aaec_507369d58bbf_Output_Payload = {|
-  statusCode: String, 
-  message: String, 
-  searchCriteria: Null, 
-  artists: Array<{|    artistId: Number,     groupName: String,     lastName: String,     firstName: String,     dateOfBirth: String {"format": "yyyy-MM-dd"},     mi: String,     dateOfDeath: String {"format": "yyyy-MM-dd"}  |}>
-|}
-

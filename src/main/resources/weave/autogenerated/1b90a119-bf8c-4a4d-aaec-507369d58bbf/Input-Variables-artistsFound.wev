@@ -1,4 +1,0 @@
-%dw 2.0
-
-type auto_1b90a119_bf8c_4a4d_aaec_507369d58bbf_Input_Variables_artistsFound = Array<Nothing>
-
