@@ -10,7 +10,7 @@
 	<munit:config name="artists-impl-test-suite.xml" />
 	<global-property doc:name="Global Property" doc:id="a3e48fa4-e529-42da-90e6-fa318caba84f" name="test" value="local" />
 	<configuration-properties doc:name="Configuration properties" doc:id="53e395ff-2a19-4bfc-95f1-b5a517fa6595" file="properties/${test}.properties" />
-	<munit:test name="sr-get-artist-info-test" doc:id="6b3f388a-8613-4e8f-8e6c-6a8ce810946c" description="Test" ignore="true">
+	<munit:test name="sr-get-artist-info-test" doc:id="6b3f388a-8613-4e8f-8e6c-6a8ce810946c" description="Test">
 		<munit:behavior >
 			<munit-tools:mock-when doc:name="Mock when Get Artist HTTP Request" doc:id="f09d3f1d-5a9b-4edc-a24b-f0ad38ec5992" processor="http:request">
 				<munit-tools:with-attributes >
